@@ -79,6 +79,12 @@ contract Stakingpool is Pausable {
     * @param amount       msg.value for the transaction
     */
   event NotifyStaked(address sender, uint amount);
+  
+  /** @dev trigger notification of unstaked amount
+    * @param sender       msg.sender for the transaction
+    * @param amount       msg.value for the transaction
+    */
+  event NotifyUnStaked(address sender, uint amount);
 
 
   /** @dev trigger notification of withdrawal
@@ -165,17 +171,17 @@ contract Stakingpool is Pausable {
   }
 
 
-  /** @dev unstake funds from stakeContract
+  /** @dev unstake funds from Pool
     */
   function unstake(uint amount) external  {
     
     // Fetch staking balance
-    uint balance = stakedBalances[msg.sender];
+    uint amount = stakedBalances[msg.sender];
     
-    require(balance > 0, "staking balance cannot be 0");
+    require(amount > 0, "staking balance cannot be 0");
 
     // Transfer Mocktokens 
-    mcftoken.transfer(msg.sender, balance);
+    mcftoken.transfer(msg.sender, amount);
 
         // Reset staking balance
     stakedBalances[msg.sender] = stakedBalances[msg.sender].sub(amount);
@@ -183,7 +189,7 @@ contract Stakingpool is Pausable {
     // track total staked
     totalStakedMcH = totalStakedMcH.sub(amount);
 
-    emit NotifyStaked(msg.sender, amount);
+    emit NotifyUnStaked(msg.sender, amount);
   
    }
 
