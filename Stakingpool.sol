@@ -21,7 +21,6 @@ contract Stakingpool is Pausable {
   
   MCHToken public mchtoken;
   MCFToken public mcftoken;
-  uint tokensEmitted;
   uint public end;
   
   modifier onlyOwner {
@@ -205,7 +204,8 @@ contract Stakingpool is Pausable {
   
   function calcRewards(address _user) internal view returns (uint) {
       
-      uint rewards = (stakedShares[_user].mul(tokensEmitted)).div(100);
+      uint mcftokensEmitted = mcftoken.totalSupply();
+      uint rewards = (stakedShares[_user].mul(mcftokensEmitted)).div(100);
       return rewards;
   }
   
@@ -216,6 +216,7 @@ contract Stakingpool is Pausable {
        for (uint256 i = 0; i < users.length; i += 1) {
            address user = users[i];
            uint256 reward = calcRewards(user);
+           mcftoken.transfer(user,reward);
            currentstakeyields[user] = currentstakeyields[user].add(reward);
            vested[user] = currentstakeyields[user].div(2);
            claimable[user]=currentstakeyields[user].sub(vested[user]);
@@ -230,9 +231,9 @@ contract Stakingpool is Pausable {
        // Require amount greater than 0
           require(balance > 0, "balance cannot be 0");
     
-       //   mcftoken.transfer(msg.sender, balance);
+         mcftoken.transfer(msg.sender, balance);
        
-        payable(msg.sender).transfer(balance);
+       // payable(msg.sender).transfer(balance);
      
         claimable[msg.sender] = 0;
     }
