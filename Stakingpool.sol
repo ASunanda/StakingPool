@@ -61,13 +61,6 @@ contract Stakingpool is Pausable {
   /** @dev track vested tokens */  
   mapping(address => uint) public vested;
   
-  
-  /** @dev track total deposited to pool */
-  uint private totalDeposited;
-
-  /** @dev track balances of ether deposited to pool */
-  mapping(address => uint) public depositedBalances;
-  
   /** @dev track user request to enter next staking period */
   mapping(address => uint) public ApproveStake;
   
