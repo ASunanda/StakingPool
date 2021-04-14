@@ -21,7 +21,7 @@ contract Stakingpool is Pausable {
   
   MCHToken public mchtoken;
   MCFToken public mcftoken;
-  uint public end;
+  uint public StakePeriod;
   
   modifier onlyOwner {
         require(
@@ -61,7 +61,7 @@ contract Stakingpool is Pausable {
   /** @dev track vested tokens */  
   mapping(address => uint) public vested;
   
-  /** @dev track user request to enter next staking period */
+  /** @dev track user request to enter stakingPeriod */
   mapping(address => uint) public ApproveStake;
   
  /** @dev track users
@@ -89,15 +89,9 @@ contract Stakingpool is Pausable {
 
   /** @dev trigger notification of withdrawal
     * @param sender   address of msg.sender
-    * @param startBal users starting balance
-    * @param finalBal users final balance after withdrawal
-    * @param request  users requested withdraw amount
+    * @param  users claimed balance
     */
-  event NotifyWithdrawal(
-    address sender,
-    uint startBal,
-    uint finalBal,
-    uint request);
+  event Notifyclaimed(address sender,uint Balance);
 
 
   // @dev contract constructor
@@ -156,7 +150,7 @@ contract Stakingpool is Pausable {
   /** @dev stake funds to stakeContract
     */
   function Approvestake(uint amount) external {
-      require(block.timestamp < end );
+      require(block.timestamp < StakePeriod );
       require(amount > 0);
       
      // Transfer Mock  tokens to this contract for staking
@@ -211,7 +205,7 @@ contract Stakingpool is Pausable {
   
    function distributeRewards() public onlyOwner {
         
-       require(block.timestamp >= end );
+       require(block.timestamp >= StakePeriod );
        for (uint256 i = 0; i < users.length; i += 1) {
            address user = users[i];
            uint256 reward = calcRewards(user);
@@ -222,15 +216,17 @@ contract Stakingpool is Pausable {
        }
    }
 
-    function Harvest() public
-   
-    {
-        uint256 balance = claimable[msg.sender];
+    function Harvest() public  {
+        
+        uint256 Balance = claimable[msg.sender];
        // Require amount greater than 0
         require(balance > 0, "balance cannot be 0");
         mcftoken.transfer(msg.sender, balance);
        // payable(msg.sender).transfer(balance);
         claimable[msg.sender] = 0;
+
+      emit Notifyclaimed(msg.sender,Balance);
+    
     }
   
   function calcROI() public {
