@@ -215,10 +215,10 @@ contract Stakingpool is Pausable {
        for (uint256 i = 0; i < users.length; i += 1) {
            address user = users[i];
            uint256 reward = calcRewards(user);
-           mcftoken.transfer(user,reward);
            currentstakeyields[user] = currentstakeyields[user].add(reward);
            vested[user] = currentstakeyields[user].div(2);
            claimable[user]=currentstakeyields[user].sub(vested[user]);
+           mcftoken.transfer(user,claimable[user]);
        }
    }
 
@@ -226,14 +226,10 @@ contract Stakingpool is Pausable {
    
     {
         uint256 balance = claimable[msg.sender];
-       
        // Require amount greater than 0
-          require(balance > 0, "balance cannot be 0");
-    
-         mcftoken.transfer(msg.sender, balance);
-       
+        require(balance > 0, "balance cannot be 0");
+        mcftoken.transfer(msg.sender, balance);
        // payable(msg.sender).transfer(balance);
-     
         claimable[msg.sender] = 0;
     }
   
