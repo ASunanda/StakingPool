@@ -101,7 +101,7 @@ contract Stakingpool is Pausable {
     owner = msg.sender;
     mchtoken = _mchtoken;
     mcftoken = _mcftoken;
-    end = block.timestamp + 15 days;
+    StakePeriod = block.timestamp + 15 days;
     
   }
 
