@@ -170,10 +170,10 @@ contract Stakingpool is Pausable {
     // Fetch staking balance
     uint amount = stakedBalances[msg.sender];
     
-    require(amount > 0, "staking balance cannot be 0");
+    require(amount > 0, "unstaking balance cannot be 0");
 
     // Transfer Mocktokens 
-    mcftoken.transfer(msg.sender, amount);
+    mchtoken.transfer(msg.sender, amount);
 
     // Reset staking balance
     stakedBalances[msg.sender] = stakedBalances[msg.sender].sub(amount);
@@ -202,7 +202,7 @@ contract Stakingpool is Pausable {
   
    function distributeRewards() public onlyOwner {
         
-       require(block.timestamp >= StakePeriod );
+       require(block.timestamp >= StakePeriod ,"StakePeriod not completed");
        for (uint256 i = 0; i < users.length; i += 1) {
            address user = users[i];
            uint256 reward = calcRewards(user);
