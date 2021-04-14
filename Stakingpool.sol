@@ -165,7 +165,7 @@ contract Stakingpool is Pausable {
 
   /** @dev unstake funds from Pool
     */
-  function unstake(uint amount) external  {
+  function unstake() external  {
     
     // Fetch staking balance
     uint amount = stakedBalances[msg.sender];
