@@ -64,10 +64,7 @@ contract Stakingpool is Pausable {
   /** @dev track vested tokens */  
   mapping(address => uint) public vested;
   
-  /** @dev track user request to enter stakingPeriod */
-  mapping(address => uint) public ApproveStake;
-  
- /** @dev track users
+   /** @dev track users
     * users must be tracked in this array because mapping is not iterable */
   address[] public users;
   
