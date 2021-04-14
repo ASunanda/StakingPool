@@ -87,10 +87,7 @@ contract Stakingpool is Pausable {
   event NotifyUnStaked(address sender, uint amount);
 
 
-  /** @dev trigger notification of withdrawal
-    * @param sender   address of msg.sender
-    * @param  users claimed balance
-    */
+  // @dev trigger notification of claimed amount
   event Notifyclaimed(address sender,uint Balance);
 
 
@@ -220,8 +217,8 @@ contract Stakingpool is Pausable {
         
         uint256 Balance = claimable[msg.sender];
        // Require amount greater than 0
-        require(balance > 0, "balance cannot be 0");
-        mcftoken.transfer(msg.sender, balance);
+        require(Balance > 0, "balance cannot be 0");
+        mcftoken.transfer(msg.sender, Balance);
        // payable(msg.sender).transfer(balance);
         claimable[msg.sender] = 0;
 
