@@ -23,6 +23,9 @@ contract Stakingpool is Pausable {
   MCFToken public mcftoken;
   uint public StakePeriod;
   
+  uint private MCHValue = 1;
+  uint private MCFValue = 2;
+  
   modifier onlyOwner {
         require(
             msg.sender == owner,
@@ -158,6 +161,7 @@ contract Stakingpool is Pausable {
        
     // track total staked
     totalStakedMcH = totalStakedMcH.add(amount);
+    totalStakedamount =  totalStakedMcH.mul(MCHValue);
 
     emit NotifyStaked(msg.sender, amount);
   }
@@ -180,6 +184,7 @@ contract Stakingpool is Pausable {
     
     // track total staked
     totalStakedMcH = totalStakedMcH.sub(amount);
+    totalStakedamount =  totalStakedMcH.mul(MCHValue);
 
     emit NotifyUnStaked(msg.sender, amount);
   
