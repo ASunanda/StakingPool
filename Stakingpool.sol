@@ -157,8 +157,9 @@ contract Stakingpool is Pausable {
     */
   function Approvestake(uint amount) external {
       require(block.timestamp < end );
+      require(amount > 0);
       
-     // Trasnfer Mock  tokens to this contract for staking
+     // Transfer Mock  tokens to this contract for staking
      mchtoken.transferFrom(msg.sender, address(this), amount);
     
     if(stakedBalances[msg.sender] == 0) addUser(msg.sender);
@@ -183,7 +184,7 @@ contract Stakingpool is Pausable {
     // Transfer Mocktokens 
     mcftoken.transfer(msg.sender, amount);
 
-        // Reset staking balance
+    // Reset staking balance
     stakedBalances[msg.sender] = stakedBalances[msg.sender].sub(amount);
     
     // track total staked
@@ -194,22 +195,21 @@ contract Stakingpool is Pausable {
    }
 
   
-  function calcShares(address _user) internal returns(uint) {
+  function calcShares(address user) internal returns(uint) {
      
-     uint shares = (stakedBalances[_user].div(totalStakedMcH)).mul(100);
-     stakedShares[_user] = stakedShares[_user].add(shares);
+     uint shares = (stakedBalances[user].div(totalStakedMcH)).mul(100);
+     stakedShares[user] = stakedShares[user].add(shares);
      return shares;
   }
   
-  function calcRewards(address _user) internal view returns (uint) {
+  function calcRewards(address user) internal view returns (uint) {
       
       uint mcftokensEmitted = mcftoken.totalSupply();
-      uint rewards = (stakedShares[_user].mul(mcftokensEmitted)).div(100);
+      uint rewards = (stakedShares[user].mul(mcftokensEmitted)).div(100);
       return rewards;
   }
   
-   function distributeRewards() public onlyOwner
-      {
+   function distributeRewards() public onlyOwner {
         
        require(block.timestamp >= end );
        for (uint256 i = 0; i < users.length; i += 1) {
