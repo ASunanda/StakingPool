@@ -215,7 +215,8 @@ contract Stakingpool is Pausable {
         require(Balance > 0, "balance cannot be 0");
         mcftoken.transfer(msg.sender, Balance);
        // payable(msg.sender).transfer(balance);
-        claimable[msg.sender] = 0;
+       currentstakeyields[user] = currentstakeyields[user].add(reward)
+       claimable[msg.sender] = 0;
 
        emit Notifyclaimed(msg.sender,Balance);
     
