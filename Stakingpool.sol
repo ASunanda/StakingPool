@@ -197,8 +197,8 @@ contract Stakingpool is Pausable {
   
   
    function distributeRewards() external onlyOwner {
-        
-       require(block.timestamp >= StakePeriod ,"StakePeriod not completed");
+     require(block.timestamp >= StakePeriod ,"StakePeriod not completed");
+       
        for (uint256 i = 0; i < users.length; i += 1) {
            address user = users[i];
            uint256 reward = calcRewards(user);
@@ -209,6 +209,7 @@ contract Stakingpool is Pausable {
    }
 
     function Harvest() external  {
+       require(block.timestamp >= StakePeriod);
         
         uint256 Balance = claimable[msg.sender];
        // Require amount greater than 0
