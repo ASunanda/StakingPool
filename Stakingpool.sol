@@ -102,8 +102,7 @@ contract Stakingpool is Pausable {
     
   }
 
-  
-  /************************ USER MANAGEMENT **********************************/
+  /************************ USER MANAGEMENT ***********************/
 
   /** @dev test if user is in current user list
     * @param _user address of user to test if in list
@@ -140,7 +139,7 @@ contract Stakingpool is Pausable {
     if (_user == owner ) return;
     if (!isExistingUser(_user)) users.push(_user);
    }
-  /************************ USER MANAGEMENT **********************************/
+  /************************ USER MANAGEMENT ***********************/
 
   
    
@@ -188,21 +187,16 @@ contract Stakingpool is Pausable {
    }
 
   
-  function calcShares(address user) internal returns(uint) {
+  function calcRewards(address user) internal returns(uint) {
      
      uint shares = (stakedBalances[user].div(totalStakedMcH)).mul(100);
      stakedShares[user] = stakedShares[user].add(shares);
-     return shares;
+     uint mcftokensEmitted = mcftoken.totalSupply();
+     return (stakedShares[user].mul(mcftokensEmitted)).div(100);
   }
   
-  function calcRewards(address user) internal view returns (uint) {
-      
-      uint mcftokensEmitted = mcftoken.totalSupply();
-      uint rewards = (stakedShares[user].mul(mcftokensEmitted)).div(100);
-      return rewards;
-  }
   
-   function distributeRewards() public onlyOwner {
+   function distributeRewards() external onlyOwner {
         
        require(block.timestamp >= StakePeriod ,"StakePeriod not completed");
        for (uint256 i = 0; i < users.length; i += 1) {
@@ -211,11 +205,10 @@ contract Stakingpool is Pausable {
            currentstakeyields[user] = currentstakeyields[user].add(reward);
            vested[user] = currentstakeyields[user].div(2);
            claimable[user]=currentstakeyields[user].sub(vested[user]);
-           mcftoken.transfer(user,claimable[user]);
-       }
+      }
    }
 
-    function Harvest() public  {
+    function Harvest() external  {
         
         uint256 Balance = claimable[msg.sender];
        // Require amount greater than 0
@@ -224,17 +217,18 @@ contract Stakingpool is Pausable {
        // payable(msg.sender).transfer(balance);
         claimable[msg.sender] = 0;
 
-      emit Notifyclaimed(msg.sender,Balance);
+       emit Notifyclaimed(msg.sender,Balance);
     
     }
   
-  function calcROI() public {
+   function calcROI() public {
      
       for (uint256 i = 0; i < users.length; i += 1) {
         address user = users[i];
         ROI[user] =  (currentstakeyields[user].div(totalStakedMcH)).mul(100);
         MROI[user] = (ROI[user]).div(12);
         DROI[user] = (ROI[user]).div(365);
+       
        }
     }
 
