@@ -8,8 +8,8 @@ contract MCHToken{
     
     string public constant symbol = "MCH";
     string public constant name = "MCH TOKEN";
-    uint8 public constant decimals = 18;
-    uint256 totalSupply = 100000000;
+    uint8 public constant decimals = 8;
+    uint256 totalSupply = 1000000000000000;
 
     
     event Transfer(
