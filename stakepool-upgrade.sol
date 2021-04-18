@@ -14,7 +14,7 @@ import {MCFToken} from"./MCFToken.sol";
 
 
 /* @title Staking Pool Contract
- * Open Zeppelin Pausable is Ownable.  contains address owner */
+ * Open Zeppelin Pausable*/
 
 contract Stakingpool is Initializable,ReentrancyGuard,Pausable{
   
