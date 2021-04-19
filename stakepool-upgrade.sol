@@ -85,17 +85,8 @@ contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgrade
 
   // @dev trigger notification of claimed amount
   event Notifyclaimed(address sender,uint Balance);
-  
-  
-      /**
-     * @dev Throws if called by any account other than the owner.
-     */
-  /*  modifier  onlyOwner {
-        require(msg.sender == owner, "onlyOwner");
-        _;
-    } */
-    
-       /**
+ 
+    /**
      * @dev Throws if called before stakingperiod
      */
     modifier  onlyAfter() {
