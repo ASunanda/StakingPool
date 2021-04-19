@@ -2,25 +2,27 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+
+
 import {MCHToken} from "./MCHToken.sol";
 import {MCFToken} from"./MCFToken.sol";
 
 
 
 /* @title Staking Pool Contract
- * Open Zeppelin Pausable*/
+ * Open Zeppelin Pausable  */
 
-contract Stakingpool is Initializable,ReentrancyGuard,Pausable{
+contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgradeable ,OwnableUpgradeable{
   
-  using SafeMath for uint;
+  using SafeMathUpgradeable for uint;
   
-  address private owner;
   MCHToken public mchtoken;
   MCFToken public mcftoken;
   uint public StakePeriod;
@@ -88,29 +90,31 @@ contract Stakingpool is Initializable,ReentrancyGuard,Pausable{
       /**
      * @dev Throws if called by any account other than the owner.
      */
-    modifier  onlyOwner() {
+  /*  modifier  onlyOwner {
         require(msg.sender == owner, "onlyOwner");
         _;
-    }
+    } */
     
        /**
      * @dev Throws if called before stakingperiod
      */
     modifier  onlyAfter() {
         
-        require(block.timestamp >= StakePeriod ,"StakePeriod not completed");
+       require(block.timestamp >= StakePeriod ,"StakePeriod not completed");
         _;
     }
 
 
  // @dev contract Initializable
     
- function Initialize (MCHToken _mchtoken, MCFToken _mcftoken) public initializer {
-     
-    mchtoken = _mchtoken;
-    mcftoken = _mcftoken;
-    owner = msg.sender;
-    StakePeriod = block.timestamp + 15 days;
+    function Initialize (MCHToken _mchtoken, MCFToken _mcftoken) public {
+    
+   __Ownable_init_unchained(); 
+   __ReentrancyGuard_init_unchained();
+   __Pausable_init_unchained();
+     mchtoken = _mchtoken;
+     mcftoken = _mcftoken;
+     StakePeriod = block.timestamp + 15 days;
     
   }
 
@@ -132,7 +136,7 @@ contract Stakingpool is Initializable,ReentrancyGuard,Pausable{
     * @param user address of user to remove from the list
     */
   function removeUser(address user) internal {
-    if (user == owner ) return;
+    if (user == owner() ) return;
     uint index = userIndex[user];
     // user is not last user
     if (index < users.length.sub(1)) {
@@ -148,7 +152,7 @@ contract Stakingpool is Initializable,ReentrancyGuard,Pausable{
     * @param user address of user to add to the list
     */
    function addUser(address user) internal {
-    if (user == owner ) return;
+    if (user == owner() ) return;
     if (!isExistingUser(user)) users.push(user);
    }
   /************************ USER MANAGEMENT ***********************/
@@ -212,7 +216,7 @@ contract Stakingpool is Initializable,ReentrancyGuard,Pausable{
   
   
   
-   function distributeRewards() external onlyOwner onlyAfter() {
+   function distributeRewards() external onlyOwner() onlyAfter() {
        
        for (uint256 i = 0; i < users.length; i += 1) {
            address user = users[i];
@@ -237,7 +241,7 @@ contract Stakingpool is Initializable,ReentrancyGuard,Pausable{
     
     }
   
-   function calcROI() public onlyAfter() {
+   function calcROI() external onlyOwner() onlyAfter() {
      
       for (uint256 i = 0; i < users.length; i += 1) {
         address user = users[i];
