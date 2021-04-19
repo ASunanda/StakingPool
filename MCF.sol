@@ -51,17 +51,7 @@ contract MCFToken is Initializable,ContextUpgradeable,IERC20Upgradeable,OwnableU
     uint8 public _decimals = 10;
     
      
-
-    /**
-     * @dev Sets the values for {name} and {symbol}.
-     *
-     * The defaut value of {decimals} is 18. To select a different value for
-     * {decimals} you should overload it.
-     *
-     * All two of these values are immutable: they can only be set once during
-     * construction.
-     */
-    function Initialize () public initializer {
+     function Initialize () public initializer {
         __Context_init_unchained();
         __ReentrancyGuard_init_unchained();
         __Pausable_init_unchained();
