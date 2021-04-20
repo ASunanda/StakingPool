@@ -45,19 +45,33 @@ contract MCFToken is Initializable,ContextUpgradeable,IERC20Upgradeable,OwnableU
     address private _owner;
 
     uint256 private _totalSupply;
-
-    string public _name =" MCFToken ";
-    string public _symbol= "MCF";
-    uint8 public _decimals = 10;
     
-     
-     function Initialize () public initializer {
+    string public _name ;
+    string public _symbol;
+    uint8 public _decimals ;
+   
+
+    /**
+     * @dev Sets the values for {name} and {symbol}.
+     *
+     * The defaut value of {decimals} is 18. To select a different value for
+     * {decimals} you should overload it.
+     *
+     * All two of these values are immutable: they can only be set once during
+     * construction.
+     */
+    function Initialize () public initializer {
         __Context_init_unchained();
         __ReentrancyGuard_init_unchained();
         __Pausable_init_unchained();
         __Ownable_init_unchained();
         _totalSupply = 150000000;
         _balances[msg.sender]=_totalSupply;
+        _name = "MCFToken";
+        _symbol = "MCF";
+        _decimals = 10;
+        
+   
     }
     
    /**
