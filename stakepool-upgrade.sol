@@ -19,7 +19,7 @@ import {MCFToken} from"./MCFToken.sol";
 /* @title Staking Pool Contract
  * Open Zeppelin Pausable  */
 
-contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgradeable ,OwnableUpgradeable{
+contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgradeable{
   
   using SafeMathUpgradeable for uint;
   
@@ -27,7 +27,11 @@ contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgrade
   MCFToken public mcftoken;
   uint public StakePeriod;
   
-  uint public MCHValue;
+  uint public MCHValue=1;
+  uint public MCFValue=2;
+  
+  
+  address private owner;
   
   
  /** @dev track total current stake yields of a user */
@@ -85,11 +89,20 @@ contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgrade
 
   // @dev trigger notification of claimed amount
   event Notifyclaimed(address sender,uint Balance);
+  
  
+  modifier onlyOwner {
+        require(
+            msg.sender == owner,
+            "Only owner can call this function."
+        );
+        _;
+    }
+  
     /**
      * @dev Throws if called before stakingperiod
      */
-    modifier  onlyAfter() {
+    modifier onlyAfter() {
         
        require(block.timestamp >= StakePeriod ,"StakePeriod not completed");
         _;
@@ -98,59 +111,63 @@ contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgrade
 
  // @dev contract Initializable
     
-    function Initialize (MCHToken _mchtoken, MCFToken _mcftoken) public {
+    function Initialize (MCHToken _mchtoken, MCFToken _mcftoken) public initializer {
     
-   __Ownable_init_unchained(); 
-   __ReentrancyGuard_init_unchained();
-   __Pausable_init_unchained();
      mchtoken = _mchtoken;
      mcftoken = _mcftoken;
+     owner = msg.sender;
      StakePeriod = block.timestamp + 15 days;
+     
+     
     
   }
 
-  /************************ USER MANAGEMENT ***********************/
+
+   /************************ USER MANAGEMENT ***********************/
 
   /** @dev test if user is in current user list
     * @param user address of user to test if in list
     * @return true if user is on record, otherwise false
     */
-  function isExistingUser(address user) internal view returns (bool) {
+  function isUser(address user)
+       internal
+       view
+       returns(bool, uint256)
+   {
+       for (uint256 i = 0; i < users.length; i += 1){
+           if (user == users[i]) return (true, i);
+       }
+       return (false, 0);
+   }
     
-      for(uint256 i=0;i<users.length;i+=1) {
-          if(user ==users[i]) return(true);
-      }
-      
-    return (false);
-  }
-  /** @dev remove a user from users array
-    * @param user address of user to remove from the list
-    */
-  function removeUser(address user) internal {
-    if (user == owner() ) return;
-    uint index = userIndex[user];
-    // user is not last user
-    if (index < users.length.sub(1)) {
-      address lastUser = users[users.length.sub(1)];
-      users[index] = lastUser;
-      userIndex[lastUser] = index;
-    }
-    // this line removes last user
-    users.length.sub(1);
-  }
-
-  /** @dev add a user to users array
+    /** @dev add a user to users array
     * @param user address of user to add to the list
     */
-   function addUser(address user) internal {
-    if (user == owner() ) return;
-    if (!isExistingUser(user)) users.push(user);
+  
+    function addUser(address user)
+       internal
+   {
+       (bool _isUser, ) = isUser(user);
+       if(!_isUser) users.push(user);
+   }
+   
+   /** @dev remove a user from users array
+    * @param user address of user to remove from the list
+    */
+    
+   function removeUser(address user)
+       internal
+   {
+       (bool isUser, uint256 i) = isUser(user);
+       if(isUser){
+           users[i] = users[users.length - 1];
+           users.pop();
+       }
    }
   /************************ USER MANAGEMENT ***********************/
 
   
-   
-  /** @dev stake funds to Contract
+   /** @dev stake funds to Contract
     */
   function Approvestake(uint amount) external whenNotPaused {
       require (block.timestamp < StakePeriod );
@@ -175,9 +192,9 @@ contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgrade
 
   /** @dev unstake funds from Pool
     */
-  function unstake(uint amount) external  onlyAfter() whenNotPaused {
+   function unstake(uint amount) external whenNotPaused {
     
-    require(amount > 0, "unstaking balance cannot be 0");
+    require(stakedBalances[msg.sender] >= amount, "unstaking balance cannot be 0");
 
     // Transfer Mocktokens 
     mchtoken.transfer(msg.sender, amount);
@@ -199,15 +216,16 @@ contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgrade
    }
 
   
-    function calcRewards(address user) internal view onlyAfter() returns(uint) {
+    function calcRewards(address user) public view returns(uint) {
      
      uint mcftokensEmitted = mcftoken.totalSupply();
      return (stakedShares[user].mul(mcftokensEmitted)).div(100);
-   }
+   
+        
+    }
   
   
-  
-   function distributeRewards() external onlyOwner() onlyAfter() {
+    function distributeRewards() external onlyOwner()  {
        
        for (uint256 i = 0; i < users.length; i += 1) {
            address user = users[i];
@@ -218,7 +236,7 @@ contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgrade
       }
    }
 
-    function Harvest() external onlyAfter() whenNotPaused nonReentrant() {
+    function Harvest() external whenNotPaused nonReentrant() {
         
         uint256 Balance = claimable[msg.sender];
        // Require amount greater than 0
@@ -232,7 +250,7 @@ contract Stakingpool is Initializable,ReentrancyGuardUpgradeable,PausableUpgrade
     
     }
   
-   function calcROI() external onlyOwner() onlyAfter() {
+   function calcROI() external onlyOwner()  {
      
       for (uint256 i = 0; i < users.length; i += 1) {
         address user = users[i];
